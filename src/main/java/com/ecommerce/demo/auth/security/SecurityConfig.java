@@ -44,9 +44,6 @@ public class SecurityConfig {
                                 "/api/v1/categories/**"
                         ).permitAll()
 
-                        // CART (any logged-in user)
-                        .requestMatchers("/api/v1/cart/**").authenticated()
-
                         // ADMIN WRITE
                         .requestMatchers(HttpMethod.POST,
                                 "/api/v1/products/**",
@@ -62,6 +59,12 @@ public class SecurityConfig {
                                 "/api/v1/products/**",
                                 "/api/v1/categories/**"
                         ).hasRole("ADMIN")
+
+                        // CART (any logged-in user)
+                        .requestMatchers("/api/v1/cart/**").authenticated()
+
+                        // ORDER (any logged-in user)
+                        .requestMatchers("/api/v1/orders/**").authenticated()
 
                         .anyRequest().authenticated()
                 )
