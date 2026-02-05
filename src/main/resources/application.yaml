@@ -14,3 +14,9 @@ spring:
       hibernate:
         format_sql: true
     show-sql: true
+
+app:
+  jwt:
+    secret: "this-is-a-very-long-random-secret-key-32bytes-minimum!!!"
+    ttlSeconds: 3600
+
