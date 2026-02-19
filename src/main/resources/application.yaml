@@ -20,3 +20,6 @@ app:
     secret: "this-is-a-very-long-random-secret-key-32bytes-minimum!!!"
     ttlSeconds: 3600
 
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY}
+
