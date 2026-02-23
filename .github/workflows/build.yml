@@ -1,4 +1,4 @@
-name: Build JAR
+name: Build JAR (Windows)
 
 on:
   push:
@@ -8,14 +8,11 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-
-      - name: Give execute permission to mvnw
-        run: chmod +x mvnw
 
       - name: Setup Java 21
         uses: actions/setup-java@v4
@@ -24,11 +21,11 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Build with Maven Wrapper
-        run: ./mvnw clean package
+      - name: Build with Maven Wrapper (Windows)
+        run: mvnw.cmd clean package
 
       - name: Upload JAR Artifact
         uses: actions/upload-artifact@v4
         with:
           name: built-jar
-          path: target/*.jar
+          path: target\*.jar
