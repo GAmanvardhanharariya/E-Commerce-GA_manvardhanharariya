@@ -1,4 +1,4 @@
-name: Build JAR (Windows + Linux)
+name: Build JAR (Security + Windows + Linux)
 
 on:
   push:
@@ -7,10 +7,48 @@ on:
   workflow_dispatch:
 
 jobs:
+
+  # ==============================
+  # 1️⃣ SECURITY JOB
+  # ==============================
+  security:
+    name: Security Scan (Snyk)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Make mvnw executable
+        run: chmod +x mvnw
+
+      - name: Install Snyk
+        uses: snyk/actions/setup@master
+
+      - name: Authenticate Snyk
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
+      - name: Run Snyk Scan
+        run: snyk test --severity-threshold=high
+
+
+  # ==============================
+  # 2️⃣ BUILD MATRIX JOB
+  # ==============================
   build:
+    name: Build on Windows & Linux
+    needs: security
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest]
+      fail-fast: false
 
     runs-on: ${{ matrix.os }}
 
@@ -25,29 +63,14 @@ jobs:
           java-version: '21'
           cache: maven
 
-      # Install Snyk CLI
-      - name: Install Snyk
-        uses: snyk/actions/setup@master
-
-      # Authenticate Snyk
-      - name: Authenticate Snyk
-        run: snyk auth ${{ secrets.SNYK_TOKEN }}
-
-      # Run Snyk test BEFORE build
-      - name: Run Snyk Scan
-        run: snyk test --severity-threshold=high
-
-      # Linux needs execute permission
       - name: Make mvnw executable (Linux only)
         if: runner.os == 'Linux'
         run: chmod +x mvnw
 
-      # Build on Windows
       - name: Build (Windows)
         if: runner.os == 'Windows'
         run: .\mvnw.cmd clean package -DskipTests
 
-      # Build on Linux
       - name: Build (Linux)
         if: runner.os == 'Linux'
         run: ./mvnw clean package -DskipTests
@@ -56,4 +79,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: built-jar-${{ matrix.os }}
-          path: target/*
+          path: target/*.jar
